@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<!-- saved from url=(0057)https://twiliodeved.github.io/message-segment-calculator/ -->
+<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  
+  <title>Messaging Segment Calculator</title>
+  <link rel="stylesheet" href="./Messaging Segment Calculator_files/main.css">
+  <script type="text/javascript" src="./Messaging Segment Calculator_files/grapheme-splitter.js"></script>
+  <script type="text/javascript" src="./Messaging Segment Calculator_files/segments_calculator.js"></script>
+  <script type="text/javascript" src="./Messaging Segment Calculator_files/segments_viewer.js"></script>
+</head>
+
+<body>
+  <h1>Messaging Segment Calculator</h1>
+  <div id="calculator">
+    <div id="calculator-header">
+      <div id="message-box">
+        <label class="label" for="message">SMS Message </label>
+        <textarea class="" type="text" id="message" name="message"></textarea>
+      </div>
+
+      <div id="information-box">
+
+        <span class="label">Encoding</span>
+        <div class="value">
+          <select class="not-really-value" id="encoding">
+            <option value="auto">Automatic</option>
+            <option value="GSM-7">GSM-7</option>
+            <option value="UCS-2">UCS-2</option>
+          </select>
+        </div>
+
+        <span class="label">Encoding Used</span>
+        <span class="value" id="encoding-used">GSM-7</span>
+
+        <span class="label">Number of segments</span>
+        <span class="value" id="segment-counter">0</span>
+
+        <span class="label">Number of characters</span>
+        <span class="value" id="unicode-char-counter">0</span>
+
+        <span class="label">Number of Unicode scalars</span>
+        <span class="value" id="unicode-scalar-counter">0</span>
+
+        <span class="label">Message size</span>
+        <span class="value" id="message-size-counter">0 bits</span>
+
+        <span class="label">Total size sent</span>
+        <span class="value" id="total-size-counter">0 bits</span>
+      </div>
+    </div>
+
+    <div id="viewers">
+      <div id="viewers-inner">
+
+        <span class="label">Message Parsed</span>
+        <span class="value">
+          <span id="message-blocks" data-encoding="GSM-7">
+            <div id="message-viewer"></div>
+          </span>
+        </span>
+
+        <span class="label">Segments</span>
+        <span class="value">
+          <span id="segments-blocks" data-encoding="GSM-7">
+            <div id="segments-viewer"></div>
+          </span>
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const graphemeSplitter = new GraphemeSplitter();
+    const messageBox = document.getElementById('message');
+    const encodingSelect = document.getElementById('encoding');
+    const encodingUsed = document.getElementById('encoding-used');
+
+    const messageViewerBox = document.getElementById('message-blocks');
+    const segmentsViewerBox = document.getElementById('segments-blocks');
+
+    const messageViewer = new MessageViewer(document.getElementById('message-viewer'), 5);
+    const segmentsViewer = new SegmentsViewer(document.getElementById('segments-viewer'), 5);
+
+    const counters = {
+      segments: document.getElementById('segment-counter'),
+      unicodeCharCounter: document.getElementById('unicode-char-counter'),
+      unicodeScalarCounter: document.getElementById('unicode-scalar-counter'),
+      messageSize: document.getElementById('message-size-counter'),
+      totalSize: document.getElementById('total-size-counter')
+    };
+
+    function updateCalculator() {
+      const messageBodyText = messageBox.value;
+      const encoding = encodingSelect.value;
+
+      const segmentedMessage = new SegmentedMessage(messageBodyText, encoding, graphemeSplitter);
+
+      if (encodingUsed.textContent !== segmentedMessage.getEncodingName()) {
+        messageViewerBox.setAttribute('data-encoding', segmentedMessage.getEncodingName());
+        segmentsViewerBox.setAttribute('data-encoding', segmentedMessage.getEncodingName());
+        encodingUsed.textContent = segmentedMessage.getEncodingName();
+        encodingUsed.classList.add('recently-changed');
+        setTimeout(() => {encodingUsed.classList.remove('recently-changed');}, 3000);
+      }
+
+      counters.segments.textContent = segmentedMessage.segments.length;
+      counters.unicodeCharCounter.textContent = graphemeSplitter.countGraphemes(messageBodyText);
+      counters.unicodeScalarCounter.textContent = [...messageBodyText].length;
+      counters.messageSize.textContent = `${segmentedMessage.messageSize} bits`;
+      counters.totalSize.textContent = `${segmentedMessage.totalSize} bits`;
+
+      messageViewer.update(segmentedMessage);
+      segmentsViewer.update(segmentedMessage);
+    }
+
+    function selectBlocks(event) {
+      const block = event.target.closest('.block');
+      if (block) {
+        const mapKey = block.getAttribute("data-key");
+
+        if (mapKey) {
+          messageViewer.select(mapKey);
+          segmentsViewer.select(mapKey);
+        }
+      }
+    }
+
+    function clearSelection(event) {
+      messageViewer.clearSelection();
+      segmentsViewer.clearSelection();
+    }
+
+    messageBox.oninput = (event) => { updateCalculator(); };
+    encodingSelect.onchange = (event) => { updateCalculator(); };
+
+    messageViewerBox.onmouseout = clearSelection;
+    segmentsViewerBox.onmouseout = clearSelection;
+
+    messageViewerBox.onmouseover = selectBlocks;
+    segmentsViewerBox.onmouseover = selectBlocks;
+
+    updateCalculator();
+  </script>
+
+
+
+</body></html>
