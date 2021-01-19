@@ -4,13 +4,24 @@ body {
     font-size: 11pt;
 }
 
-h1 {
-    width: 100%;
+.header {
+	background-color: #006eab;
+	height: 40px;
+}
+
+.header img {
+	float: left;
+	height: 35px;
+}
+
+.header h1 {
     text-align: center;
+    color: white;
+    height: 35px;
 }
 
 #calculator-header {
-    background-color: #233659;
+    background-color: #006eab;  
     padding: 10px;
 }
 
@@ -39,14 +50,14 @@ h1 {
     text-align: center;
     font-size: small;
     font-variant: all-petite-caps;
-    background-color: #233659;
+    background-color: #006eab;
     color: white;
 }
 #information-box > .value {
     padding-top: 5px;
     font-size: medium;
     text-align: center;
-    background-color: #233659;
+    background-color: #006eab;
     color: white;
     margin-bottom: 0;
 }

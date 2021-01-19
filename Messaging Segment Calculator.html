@@ -2,7 +2,7 @@
 <!-- saved from url=(0057)https://twiliodeved.github.io/message-segment-calculator/ -->
 <html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
   
-  <title>Messaging Segment Calculator</title>
+  <title>GSM7 Encoder</title>
   <link rel="stylesheet" href="./Messaging Segment Calculator_files/main.css">
   <script type="text/javascript" src="./Messaging Segment Calculator_files/grapheme-splitter.js"></script>
   <script type="text/javascript" src="./Messaging Segment Calculator_files/segments_calculator.js"></script>
@@ -10,11 +10,13 @@
 </head>
 
 <body>
-  <h1>Messaging Segment Calculator</h1>
+  <div class="header">
+    <img src="worldline.jpg" alt="Italian Trulli"><h1>SMS Encoder</h1>
+  </div>
   <div id="calculator">
     <div id="calculator-header">
       <div id="message-box">
-        <label class="label" for="message">SMS Message </label>
+        <label class="label" for="message">SMS Message</label>
         <textarea class="" type="text" id="message" name="message"></textarea>
       </div>
 
@@ -70,17 +72,24 @@
   </div>
 
   <script>
+    /* Function used to breaks a Javascript string into individual user-perceived "characters" */
     const graphemeSplitter = new GraphemeSplitter();
+    /* Get the message that is typed by the user */
     const messageBox = document.getElementById('message');
+    /* The encoding that the user desires */
     const encodingSelect = document.getElementById('encoding');
+    /* The encoding that has been used in the end */
     const encodingUsed = document.getElementById('encoding-used');
 
+    /* To show the output create two boxes*/
     const messageViewerBox = document.getElementById('message-blocks');
     const segmentsViewerBox = document.getElementById('segments-blocks');
 
+    /* Viewers that are used for */
     const messageViewer = new MessageViewer(document.getElementById('message-viewer'), 5);
     const segmentsViewer = new SegmentsViewer(document.getElementById('segments-viewer'), 5);
 
+    /* Initialise counters for calculation of segments and message size*/
     const counters = {
       segments: document.getElementById('segment-counter'),
       unicodeCharCounter: document.getElementById('unicode-char-counter'),
