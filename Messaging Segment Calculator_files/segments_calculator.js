@@ -48,7 +48,7 @@ const unicodeToGsm = {
     0x003E: [0x3E],
     0x003F: [0x3F],
     0x0040: [0x00],
-    0x0041: [0x41],
+    0x0041: [0x41],  
     0x0042: [0x42],
     0x0043: [0x43],
     0x0044: [0x44],
@@ -105,9 +105,9 @@ const unicodeToGsm = {
     0x0078: [0x78],
     0x0079: [0x79],
     0x007A: [0x7A],
-    0x007B: [0x1B, 0x28],
-    0x007C: [0x1B, 0x40],
-    0x007D: [0x1B, 0x29],
+    0x007B: [0x1B, 0x28],  // {
+    0x007C: [0x1B, 0x40],  // |
+    0x007D: [0x1B, 0x29],  // }
     0x007E: [0x1B, 0x3D],
     0x00A1: [0x40],
     0x00A3: [0x01],
@@ -291,6 +291,9 @@ class SegmentedMessage {
     this.charClass = this.charClassForEncoding(encoding);
     this.encoding = encoding;
     this.splitter = graphemeSplitter;
+    
+    // Boolean that has been added in order to split variable which are between {}
+    this.variable = false;
 
     let encodedChars = this.encodeChars(message);
     if (encoding === "auto" && this.hasIncompatibleEncoding(encodedChars)) {
@@ -300,12 +303,16 @@ class SegmentedMessage {
 
     this.segments = this.buildSegments(encodedChars);
   }
-
+  
+  // This function takes as input all the Character and outputs the segments
+  // Input: encodedChars = [Gsmchar1, Gsmchar2, [..], Gmschar19992] or [Unichar1, Unichar2, [..], Unichar1992]
+  // Output: segments = [Segment1, Segment2, Segment3]
   buildSegments(encodedChars, useTwilioReservedBits) {
     let segments = [];
     const hasTwilioReservedBits = (useTwilioReservedBits === true);
     let currentSegment = null;
 
+    // Here we loop through all the encodings
     for (const encodedChar of encodedChars) {
       if (currentSegment === null || currentSegment.freeSizeInBits() < encodedChar.sizeInBits()) {
         
@@ -318,7 +325,6 @@ class SegmentedMessage {
       }
       currentSegment.push(encodedChar);
     }
-
     return segments;
   }
 
@@ -353,11 +359,26 @@ class SegmentedMessage {
     return false;
   }
 
+  // This function just encodes the graphemes obtained from grapheme-splitter.js
+  // The input is the message which is simply the HTML form
+  // The output is a list with the encoded characters under the required encoding
   encodeChars(message) {
     let encodedChars = [];
+    // Char is given by simple the character grapheme itself, so A B C D E a b c d 
     for (const char of this.splitter.iterateGraphemes(message)) {
       if (char.length <= 2) {
-        encodedChars.push(new this.charClass(char));
+        // If the beginning of a variable has been found then we set the boolean
+        if (char == "{") {
+          this.variable = true;
+        } 
+        // If we are not in a variable then we push the character to the output
+        if (!this.variable) {
+          encodedChars.push(new this.charClass(char));
+        }
+        // At the end we reset the variable boolean in case we are not in a variable
+        if (char == "}") {
+          this.variable = false;
+        }
       } else {
         const parts = [...char];
         for (let i = 0; i < parts.length; i++) {
