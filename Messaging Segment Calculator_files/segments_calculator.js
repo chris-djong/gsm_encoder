@@ -291,9 +291,6 @@ class SegmentedMessage {
     this.charClass = this.charClassForEncoding(encoding);
     this.encoding = encoding;
     this.splitter = graphemeSplitter;
-    
-    // Boolean that has been added in order to split variable which are between {}
-    this.variable = false;
 
     let encodedChars = this.encodeChars(message);
     if (encoding === "auto" && this.hasIncompatibleEncoding(encodedChars)) {
@@ -367,22 +364,18 @@ class SegmentedMessage {
     // Char is given by simple the character grapheme itself, so A B C D E a b c d 
     for (const char of this.splitter.iterateGraphemes(message)) {
       if (char.length <= 2) {
-        // If the beginning of a variable has been found then we set the boolean
-        if (char == "{") {
-          this.variable = true;
-        } 
-        // If we are not in a variable then we push the character to the output
-        if (!this.variable) {
-          encodedChars.push(new this.charClass(char));
-        }
-        // At the end we reset the variable boolean in case we are not in a variable
-        if (char == "}") {
-          this.variable = false;
-        }
+        encodedChars.push(new this.charClass(char));
       } else {
         const parts = [...char];
-        for (let i = 0; i < parts.length; i++) {
-          encodedChars.push(new this.charClass(parts[i], (i===0?parts.length:0)));
+        // In case we have a variable (defined as something in between { })
+        // Then parts[0] = { and parts[1] = }
+        if (parts[0] == '{' && parts[parts.length-1] == '}') {
+          console.log('Found variable');
+          encodedChars.push(new this.charClass(parts[0]));
+        } else {
+          for (let i = 0; i < parts.length; i++) {
+            encodedChars.push(new this.charClass(parts[i], (i===0?parts.length:0)));
+          }
         }
       }
     }

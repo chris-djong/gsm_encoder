@@ -42,6 +42,35 @@ function GraphemeSplitter(){
 		return  0xd800 <= str.charCodeAt(pos) && str.charCodeAt(pos) <= 0xdbff && 
 				0xdc00 <= str.charCodeAt(pos + 1) && str.charCodeAt(pos + 1) <= 0xdfff;
 	}
+	
+	// Function that checks whether a certain position of a string is a variable 
+	// Variable is defined as being between {} 
+	function isVariable(str, pos) {
+	    var is_variable = false;
+	    // First check whether we have opened brackets until the position
+	    for (let i=0; i<pos+1; i++) {
+	        if (str[i] == "{") {
+	            is_variable = true;
+	        }
+	        if (is_variable && str[i] == '}') {
+	            is_variable = false;
+	        }
+	    }
+	    // Then we have to check whether they have been closed later on, as if this is not the case then it is not a variable
+	    var found_ending = false;
+	    for (let i=pos; i<str.length; i++) {
+	        if (str[i] == '}') {
+	            found_ending = true;
+	        }
+	    }
+	    
+	    if (is_variable && found_ending) {
+	        is_variable = true;
+	    } else {
+	        is_variable = false;
+	    }	        
+	    return is_variable;
+	}
 		
 	// Private function, gets a Unicode code point from a JavaScript UTF-16 string
 	// handling surrogate pairs appropriately
@@ -84,7 +113,6 @@ function GraphemeSplitter(){
 		var all = [start].concat(mid).concat([end]);
 		var previous = all[all.length - 2]
 		var next = end
-		
 		// Lookahead termintor for:
 		// GB10. (E_Base | EBG) Extend* ?	E_Modifier
 		var eModifierIndex = all.lastIndexOf(E_Modifier)
@@ -195,10 +223,12 @@ function GraphemeSplitter(){
 		var mid = []
 		for (var i = index + 1; i < string.length; i++) {
 			// check for already processed low surrogates
-			if(isSurrogate(string, i - 1)){
+			if(isSurrogate(string, i-1)){
 				continue;
 			}
-		
+            if (isVariable(string, i-1)) {
+                continue;
+		    }
 			var next = getGraphemeBreakProperty(codePointAt(string, i));
 			if(shouldBreak(prev, mid, next)){
 				return i;
@@ -298,8 +328,7 @@ function GraphemeSplitter(){
 		){
 			return LF;
 		}
-		
-		
+			
 		if(
 		(0x0000 <= code && code <= 0x0009) || // Cc  [10] <control-0000>..<control-0009>
 		(0x000B <= code && code <= 0x000C) || // Cc   [2] <control-000B>..<control-000C>
