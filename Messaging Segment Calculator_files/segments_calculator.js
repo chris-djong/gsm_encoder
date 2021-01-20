@@ -371,7 +371,7 @@ class SegmentedMessage {
         // Then parts[0] = { and parts[1] = }
         if (parts[0] == '{' && parts[parts.length-1] == '}') {
           console.log('Found variable');
-          encodedChars.push(new this.charClass(parts[0]));
+          encodedChars.push(new this.charClass('*'));
         } else {
           for (let i = 0; i < parts.length; i++) {
             encodedChars.push(new this.charClass(parts[i], (i===0?parts.length:0)));
