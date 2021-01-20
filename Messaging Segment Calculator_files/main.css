@@ -11,13 +11,14 @@ body {
 
 .header img {
 	float: left;
-	height: 35px;
+	height: 36px;
 }
 
 .header h1 {
+	padding-top: 18px;
     text-align: center;
     color: white;
-    height: 35px;
+    height: 36px;
 }
 
 #calculator-header {
