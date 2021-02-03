@@ -363,14 +363,20 @@ class SegmentedMessage {
     let encodedChars = [];
     // Char is given by simple the character grapheme itself, so A B C D E a b c d 
     for (const char of this.splitter.iterateGraphemes(message)) {
-      if (char.length <= 2) {
+      if (char.length < 2) {
         encodedChars.push(new this.charClass(char));
-      } else {
+      } else if (char.length == 2){    // this condition was as well in the above loop before adding the variable {} condition i dont know whether such a case exists but i still kept the condition as such
+        const parts = [...char];
+        if (parts[0] == '{' && parts[parts.length-1] == '}') {
+          encodedChars.push(new this.charClass('*'));
+        } else {
+		  encodedChars.push(new this.charClass(char));	// does this ever happen?
+		}		  
+	  } else {
         const parts = [...char];
         // In case we have a variable (defined as something in between { })
         // Then parts[0] = { and parts[1] = }
         if (parts[0] == '{' && parts[parts.length-1] == '}') {
-          console.log('Found variable');
           encodedChars.push(new this.charClass('*'));
         } else {
           for (let i = 0; i < parts.length; i++) {

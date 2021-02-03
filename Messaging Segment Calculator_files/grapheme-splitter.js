@@ -46,29 +46,18 @@ function GraphemeSplitter(){
 	// Function that checks whether a certain position of a string is a variable 
 	// Variable is defined as being between {} 
 	function isVariable(str, pos) {
-	    var is_variable = false;
-	    // First check whether we have opened brackets until the position
-	    for (let i=0; i<pos+1; i++) {
-	        if (str[i] == "{") {
-	            is_variable = true;
-	        }
-	        if (is_variable && str[i] == '}') {
-	            is_variable = false;
-	        }
-	    }
-	    // Then we have to check whether they have been closed later on, as if this is not the case then it is not a variable
-	    var found_ending = false;
-	    for (let i=pos; i<str.length; i++) {
-	        if (str[i] == '}') {
-	            found_ending = true;
-	        }
-	    }
-	    
-	    if (is_variable && found_ending) {
-	        is_variable = true;
-	    } else {
-	        is_variable = false;
-	    }	        
+		var regExp = /\{([^}]*)\}/g;
+		var match;
+		var is_variable = false;
+		do {
+	        match = regExp.exec(str);
+			if (match) {
+				// In case we have an actual value
+				if ((pos >= match.index) && (pos <= (match.index+match[1].length))) {
+	                is_variable = true;	
+     			}
+			}
+		} while (match);	        
 	    return is_variable;
 	}
 		
