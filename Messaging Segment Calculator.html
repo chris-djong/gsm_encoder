@@ -40,9 +40,6 @@
         <span class="label">Number of characters</span>
         <span class="value" id="unicode-char-counter">0</span>
 
-        <span class="label">Number of Unicode scalars</span>
-        <span class="value" id="unicode-scalar-counter">0</span>
-
         <span class="label">Message size</span>
         <span class="value" id="message-size-counter">0 bits</span>
 
@@ -93,7 +90,6 @@
     const counters = {
       segments: document.getElementById('segment-counter'),
       unicodeCharCounter: document.getElementById('unicode-char-counter'),
-      unicodeScalarCounter: document.getElementById('unicode-scalar-counter'),
       messageSize: document.getElementById('message-size-counter'),
       totalSize: document.getElementById('total-size-counter')
     };
@@ -114,7 +110,6 @@
 
       counters.segments.textContent = segmentedMessage.segments.length;
       counters.unicodeCharCounter.textContent = graphemeSplitter.countGraphemes(messageBodyText);
-      counters.unicodeScalarCounter.textContent = [...messageBodyText].length;
       counters.messageSize.textContent = `${segmentedMessage.messageSize} bits`;
       counters.totalSize.textContent = `${segmentedMessage.totalSize} bits`;
 
